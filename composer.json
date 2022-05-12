@@ -1,0 +1,30 @@
+{
+    "name": "ibehbudov/payment-gateways",
+    "description": "Payment Gateways for Laravel",
+    "type": "library",
+    "require": {
+        "php": ">=8.0",
+        "guzzlehttp/guzzle": "7.4.*",
+        "spatie/array-to-xml": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Ibehbudov\\PaymentGateways\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ibehbudov\\PaymentGateways\\Providers\\PaymentServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Ibrahim Behbudov",
+            "email": "i.behbudov21@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
