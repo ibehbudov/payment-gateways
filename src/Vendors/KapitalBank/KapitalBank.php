@@ -3,15 +3,8 @@
 namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank;
 
 use Ibehbudov\PaymentGateways\Contracts\PaymentGatewayInterface;
-use Ibehbudov\PaymentGateways\Exceptions\InvalidPaymentArgumentException;
 use Ibehbudov\PaymentGateways\Exceptions\MissingPaymentConfigException;
 use Ibehbudov\PaymentGateways\Exceptions\RequestNotRedirectableException;
-use Ibehbudov\PaymentGateways\HttpPaymentClient;
-use Ibehbudov\PaymentGateways\Library\XmlConverter;
-use Ibehbudov\PaymentGateways\Vendors\KapitalBank\Requests\CreateOrderRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Macroable;
 
 class KapitalBank implements PaymentGatewayInterface {
 
@@ -49,6 +42,11 @@ class KapitalBank implements PaymentGatewayInterface {
      * @var array
      */
     public array $config;
+
+    /**
+     * @var int
+     */
+    public int $orderId;
 
     /**
      * @var BankRequest
@@ -173,11 +171,31 @@ class KapitalBank implements PaymentGatewayInterface {
     }
 
     /**
+     * @return int
+     */
+    public function getOrderId(): int
+    {
+        return $this->orderId;
+    }
+
+    /**
+     * @param int $orderId
+     */
+    public function setOrderId(int $orderId): void
+    {
+        $this->orderId = $orderId;
+    }
+
+    /**
      * @return BankRequest
      */
     public function getBankRequest(): BankRequest
     {
-        return $this->bankRequest ?? new (BankRequest::defaultRequest());
+        if(is_null($this->bankRequest)) {
+            $this->bankRequest = new (BankRequest::defaultRequest());
+        }
+
+        return $this->bankRequest;
     }
 
     /**
@@ -210,8 +228,8 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function execute(): void
     {
-        $this->getBankRequest()->exceptionWhenFailed();
-
         $this->getBankRequest()->run();
+        $this->getBankRequest()->exception();
     }
+
 }

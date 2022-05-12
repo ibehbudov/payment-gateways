@@ -55,7 +55,7 @@ class BankRequest {
     /**
      * @var bool
      */
-    public bool $exceptionWhenFailed;
+    public bool $exceptionWhenFailed = true;
 
     /**
      * @var array|string[]
