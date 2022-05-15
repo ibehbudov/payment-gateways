@@ -3,20 +3,20 @@
 namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank\Requests;
 
 use Ibehbudov\PaymentGateways\Contracts\BankRequestInterface;
-use Ibehbudov\PaymentGateways\Exceptions\InvalidPaymentArgumentException;
 use Ibehbudov\PaymentGateways\Facades\Payment;
 use Ibehbudov\PaymentGateways\Library\XmlConverter;
 use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
+use Psr\Http\Message\ResponseInterface;
 
 class CreateOrderRequest extends BankRequest implements BankRequestInterface {
 
     public bool $responseIsRedirectable = true;
 
     /**
-     * @throws InvalidPaymentArgumentException
+     * @return ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function run(): void
+    public function run()
     {
         $xml = XmlConverter::arrayToXml(
             array: [
@@ -38,14 +38,10 @@ class CreateOrderRequest extends BankRequest implements BankRequestInterface {
             rootElement: 'TKKPG',
             xmlEncoding: "UTF-8");
 
-        $response = $this->httpClient->post($this->endpoint, [
+        return $this->httpClient->post($this->endpoint, [
             'body'  =>  $xml
         ]);
-
-        $responseArray = XmlConverter::xmlToArray($response->getBody() . "");
-
-        $this->setBankResponseData($responseArray);
-
-        $this->validateBankResponse();
     }
+
+
 }

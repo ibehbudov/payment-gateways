@@ -74,6 +74,9 @@ class BankRequest {
     public function __construct()
     {
         $this->httpClient = new HttpPaymentClient([
+            'headers' => [
+                'Content-Type' => 'text/xml; charset=UTF8',
+            ],
             'curl'  =>  [
                 CURLOPT_SSLKEY          =>  Payment::getConfig('key'),
                 CURLOPT_SSLCERT         =>  Payment::getConfig('ssl_cert'),
@@ -94,7 +97,7 @@ class BankRequest {
     /**
      * @return bool
      */
-    public function isFailed(): bool
+    public function failed(): bool
     {
         return $this->failed;
     }
@@ -102,7 +105,7 @@ class BankRequest {
     /**
      * Set transaction is failed
      */
-    public function failed(): void
+    public function setFailed(): void
     {
         $this->failed = true;
     }
@@ -172,15 +175,13 @@ class BankRequest {
     }
 
     /**
-     *v alidateBankResponse
+     * validateBankResponse
      */
     public function validateBankResponse(): void
     {
         $data = $this->getBankResponseData();
 
-        $responseCode = ! empty($data['Response']['Status']) && in_array($data['Response']['Status'], $this->responseCodes) ?
-            $data['Response']['Status'] :
-            $this->responseCodes["SYSTEM_ERROR"];
+        $responseCode = $data['Response']['Status'];
 
         $responseCodeKey = array_search($responseCode, $this->responseCodes);
 
@@ -188,8 +189,7 @@ class BankRequest {
         $this->setBankResponseMessage(__('payment-gateways.kapital.' . Str::lower($responseCodeKey)));
 
         if($responseCode !== $this->responseCodes["SUCCESS"]) {
-            $this->failed();
-            $this->exception();
+            $this->setFailed();
         }
 
         $this->searchForRedirectLink();
@@ -200,7 +200,7 @@ class BankRequest {
      */
     public function exception()
     {
-        if($this->isFailed() && $this->exceptionWhenFailed === true) {
+        if($this->failed() && $this->exceptionWhenFailed === true) {
             throw new InvalidPaymentArgumentException(
                 $this->getBankResponseCode() . ": " .
                 $this->getBankResponseMessage()
@@ -221,7 +221,7 @@ class BankRequest {
      */
     public function searchForRedirectLink()
     {
-        if($this->responseIsRedirectable === true && !$this->isFailed()) {
+        if($this->responseIsRedirectable === true && !$this->failed()) {
 
             $order = $this->getBankResponseData()['Response']['Order'] ?? [];
 

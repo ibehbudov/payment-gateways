@@ -5,6 +5,11 @@ namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank;
 use Ibehbudov\PaymentGateways\Contracts\PaymentGatewayInterface;
 use Ibehbudov\PaymentGateways\Exceptions\MissingPaymentConfigException;
 use Ibehbudov\PaymentGateways\Exceptions\RequestNotRedirectableException;
+use Ibehbudov\PaymentGateways\Exceptions\UnhandledBankResponseException;
+use Ibehbudov\PaymentGateways\Library\XmlConverter;
+use Ibehbudov\PaymentGateways\Vendors\KapitalBank\Enums\OrderStatus;
+use Ibehbudov\PaymentGateways\Vendors\KapitalBank\Requests\OrderStatusRequest;
+use Illuminate\Support\Str;
 
 class KapitalBank implements PaymentGatewayInterface {
 
@@ -21,7 +26,7 @@ class KapitalBank implements PaymentGatewayInterface {
     /**
      * @var string
      */
-    public string $locale = 'RU';
+    public string $locale = 'AZ';
 
     /**
      * @var int
@@ -52,6 +57,11 @@ class KapitalBank implements PaymentGatewayInterface {
      * @var BankRequest
      */
     public BankRequest|null $bankRequest = null;
+
+    /**
+     * @var bool
+     */
+    public bool $isSuccess = false;
 
     /**
      * @throws MissingPaymentConfigException
@@ -119,7 +129,7 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function getLocale(): string
     {
-        return $this->locale;
+        return Str::upper($this->locale);
     }
 
     /**
@@ -207,6 +217,22 @@ class KapitalBank implements PaymentGatewayInterface {
     }
 
     /**
+     * @return bool
+     */
+    public function isSuccess(): bool
+    {
+        return $this->isSuccess;
+    }
+
+    /**
+     * @param bool $isSuccess
+     */
+    public function setIsSuccess(): void
+    {
+        $this->isSuccess = true;
+    }
+
+    /**
      * @return \Illuminate\Http\RedirectResponse
      * @throws RequestNotRedirectableException
      */
@@ -216,7 +242,7 @@ class KapitalBank implements PaymentGatewayInterface {
             throw new RequestNotRedirectableException("Request not redirectable");
         }
 
-        if(! $this->getBankRequest()->isFailed()) {
+        if(! $this->getBankRequest()->failed()) {
             return redirect()->to(
                 $this->getBankRequest()->getRedirectUrl()
             );
@@ -228,8 +254,45 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function execute(): void
     {
-        $this->getBankRequest()->run();
+        $client = $this->getBankRequest()->run();
+
+        try {
+            $responseArray = XmlConverter::xmlToArray($client->getBody());
+
+            $this->getBankRequest()->setBankResponseData($responseArray);
+
+        }catch (\Exception $exception) {
+            if($this->getBankRequest()->exceptionWhenFailed === true) {
+                throw new UnhandledBankResponseException($exception->getMessage());
+            }
+            else {
+                $this->getBankRequest()->setFailed();
+            }
+        }
+
+        $this->getBankRequest()->validateBankResponse();
+
         $this->getBankRequest()->exception();
+    }
+
+    /**
+     * @param string $callbackXml
+     * @throws UnhandledBankResponseException
+     */
+    public function callback(string $callbackXml)
+    {
+        $arrayResponse = XmlConverter::xmlToArray($callbackXml);
+
+        if(OrderStatus::from($arrayResponse['OrderStatus']) === OrderStatus::APPROVED) {
+            $this->setBankRequest(
+                new OrderStatusRequest(
+                    $arrayResponse['OrderID'],
+                    $arrayResponse['SessionID']
+                )
+            );
+
+            $this->execute();
+        }
     }
 
 }

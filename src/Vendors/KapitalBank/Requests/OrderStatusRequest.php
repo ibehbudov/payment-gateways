@@ -6,9 +6,10 @@ use Ibehbudov\PaymentGateways\Contracts\BankRequestInterface;
 use Ibehbudov\PaymentGateways\Facades\Payment;
 use Ibehbudov\PaymentGateways\Library\XmlConverter;
 use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
+use Ibehbudov\PaymentGateways\Vendors\KapitalBank\Enums\OrderStatus;
 use Psr\Http\Message\ResponseInterface;
 
-class RefundOrderRequest extends BankRequest implements BankRequestInterface {
+class OrderStatusRequest extends BankRequest implements BankRequestInterface {
 
     public function __construct(
         public int $orderId,
@@ -27,31 +28,13 @@ class RefundOrderRequest extends BankRequest implements BankRequestInterface {
         $xml = XmlConverter::arrayToXml(
             array: [
                 'Request' => [
-                    'Operation' => 'Refund',
+                    'Operation' => 'GetOrderStatus',
                     'Language'  => Payment::getLocale(),
                     'Order'     => [
                         'Merchant'  => Payment::getMerchant(),
                         'OrderID'   => $this->orderId,
-                        'Positions' => [
-                            'Position' => [
-                                'PaymentSubjectType'    => '1',
-                                'Quantity'              => '1',
-                                'Price'                 => '1',
-                                'Tax'                   => '1',
-                                'Text'                  => 'name position',
-                                'PaymentType'           => '2',
-                                'PaymentMethodType'     => '1',
-                            ],
-                        ],
                     ],
-                    'Description'   => Payment::getDescription(),
-                    'SessionID'     => $this->sessionId,
-                    'Refund'        => [
-                        'Amount'    => Payment::getAmount(),
-                        'Currency'  => Payment::getCurrency(),
-                        'WithFee'   => 'false',
-                    ],
-                    'Source'    => '1',
+                    'SessionID' => $this->sessionId,
                 ]
             ],
             rootElement: 'TKKPG',
@@ -60,5 +43,21 @@ class RefundOrderRequest extends BankRequest implements BankRequestInterface {
         return $this->httpClient->post($this->endpoint, [
             'body'  =>  $xml
         ]);
+    }
+
+    public function validateBankResponse(): void
+    {
+        parent::validateBankResponse();
+
+        if(! $this->failed()) {
+
+            $status = OrderStatus::from(
+                $this->getBankResponseData()['Response']['Order']['OrderStatus']
+            );
+
+            if($status === OrderStatus::APPROVED) {
+                Payment::setIsSuccess();
+            }
+        }
     }
 }
