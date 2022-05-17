@@ -8,7 +8,7 @@ use Ibehbudov\PaymentGateways\Library\XmlConverter;
 use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
 use Psr\Http\Message\ResponseInterface;
 
-class CreateOrderRequest extends BankRequest implements BankRequestInterface {
+class TaksitRequest extends BankRequest implements BankRequestInterface {
 
     public bool $responseIsRedirectable = true;
 
@@ -28,7 +28,7 @@ class CreateOrderRequest extends BankRequest implements BankRequestInterface {
                         'Merchant'      =>  $payment->getMerchant(),
                         'Amount'        =>  $payment->getAmount(),
                         'Currency'      =>  $payment->getCurrency(),
-                        'Description'   =>  $payment->getDescription(),
+                        'Description'   =>  "TAKSIT=" . $payment->getTaksitMonth(),
                         'ApproveURL'    =>  $payment->getUrls()['ApproveURL'],
                         'CancelURL'     =>  $payment->getUrls()['CancelURL'],
                         'DeclineURL'    =>  $payment->getUrls()['DeclineURL'],

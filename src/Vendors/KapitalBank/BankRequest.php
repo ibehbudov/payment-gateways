@@ -102,6 +102,11 @@ class BankRequest {
         return $this->failed;
     }
 
+    public function success()
+    {
+        return ! $this->failed;
+    }
+
     /**
      * Set transaction is failed
      */
@@ -192,7 +197,7 @@ class BankRequest {
             $this->setFailed();
         }
 
-        $this->searchForRedirectLink();
+        $this->defineVars();
     }
 
     /**
@@ -216,11 +221,15 @@ class BankRequest {
         $this->exceptionWhenFailed = $bool;
     }
 
-    /**
-     * @throws RedirectUrlNotFoundException
-     */
-    public function searchForRedirectLink()
+
+    public function defineVars()
     {
+        $order = $this->getBankResponseData()['Response']['Order'] ?? [];
+
+        if(! empty($order['OrderID'])) {
+            Payment::setOrderId($order['OrderID']);
+        }
+
         if($this->responseIsRedirectable === true && !$this->failed()) {
 
             $order = $this->getBankResponseData()['Response']['Order'] ?? [];

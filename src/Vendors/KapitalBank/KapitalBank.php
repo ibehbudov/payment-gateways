@@ -3,6 +3,7 @@
 namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank;
 
 use Ibehbudov\PaymentGateways\Contracts\PaymentGatewayInterface;
+use Ibehbudov\PaymentGateways\Exceptions\InvalidTaksitMonthException;
 use Ibehbudov\PaymentGateways\Exceptions\MissingPaymentConfigException;
 use Ibehbudov\PaymentGateways\Exceptions\RequestNotRedirectableException;
 use Ibehbudov\PaymentGateways\Exceptions\UnhandledBankResponseException;
@@ -62,6 +63,11 @@ class KapitalBank implements PaymentGatewayInterface {
      * @var bool
      */
     public bool $isSuccess = false;
+
+    /**
+     * @var int
+     */
+    public int $taksitMonth;
 
     /**
      * @throws MissingPaymentConfigException
@@ -232,6 +238,27 @@ class KapitalBank implements PaymentGatewayInterface {
         $this->isSuccess = true;
     }
 
+
+    /**
+     * @return int
+     */
+    public function getTaksitMonth(): int
+    {
+        return $this->taksitMonth;
+    }
+
+    /**
+     * @param int $taksitMonth
+     */
+    public function setTaksitMonth(int $taksitMonth): void
+    {
+        if(! in_array($taksitMonth, $this->getConfig('taksit_month'))) {
+            throw new InvalidTaksitMonthException("Invalid taksit month. Please check config file");
+        }
+
+        $this->taksitMonth = $taksitMonth;
+    }
+
     /**
      * @return \Illuminate\Http\RedirectResponse
      * @throws RequestNotRedirectableException
@@ -254,7 +281,7 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function execute(): void
     {
-        $client = $this->getBankRequest()->run();
+        $client = $this->getBankRequest()->run($this);
 
         try {
             $responseArray = XmlConverter::xmlToArray($client->getBody());

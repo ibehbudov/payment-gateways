@@ -15,10 +15,7 @@ class PaymentGateway {
      */
     public PaymentGatewayInterface $paymentGateway;
 
-    /**
-     * @var
-     */
-    public static $globalConfig;
+    public bool $refundable;
 
     /**
      * @return string
@@ -34,11 +31,13 @@ class PaymentGateway {
      */
     public function setPaymentMethod(string $paymentGateway)
     {
-        if(! new $paymentGateway instanceof PaymentGatewayInterface) {
+        $gateway = new $paymentGateway;
+
+        if(! $gateway instanceof PaymentGatewayInterface) {
             throw new UnknownPaymentMerchantException("Payment class must implement from PaymentGatewayInterface");
         }
 
-        $this->paymentGateway = new $paymentGateway;
+        $this->paymentGateway = $gateway;
 
         return $this;
     }

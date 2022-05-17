@@ -4,11 +4,13 @@ namespace Ibehbudov\PaymentGateways\Contracts;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Ibehbudov\PaymentGateways\Exceptions\InvalidPaymentArgumentException;
+use Ibehbudov\PaymentGateways\Facades\Payment;
+use Ibehbudov\PaymentGateways\PaymentGateway;
 use Psr\Http\Message\ResponseInterface;
 
 interface BankRequestInterface {
 
-    public function run();
+    public function run(PaymentGatewayInterface $payment);
 
     public function setFailed(): void;
 

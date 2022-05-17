@@ -4,11 +4,13 @@ namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank\Requests;
 
 use Ibehbudov\PaymentGateways\Contracts\BankRequestInterface;
 use Ibehbudov\PaymentGateways\Contracts\PaymentGatewayInterface;
+use Ibehbudov\PaymentGateways\Facades\Payment;
 use Ibehbudov\PaymentGateways\Library\XmlConverter;
+use Ibehbudov\PaymentGateways\PaymentGateway;
 use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
 use Psr\Http\Message\ResponseInterface;
 
-class CreateOrderRequest extends BankRequest implements BankRequestInterface {
+class PreAuthRequest extends BankRequest implements BankRequestInterface {
 
     public bool $responseIsRedirectable = true;
 
@@ -24,7 +26,7 @@ class CreateOrderRequest extends BankRequest implements BankRequestInterface {
                     'Operation' =>  'CreateOrder',
                     'Language'  =>  $payment->getLocale(),
                     'Order'     =>  [
-                        'OrderType'     =>  'Purchase',
+                        'OrderType'     => 'PreAuth',
                         'Merchant'      =>  $payment->getMerchant(),
                         'Amount'        =>  $payment->getAmount(),
                         'Currency'      =>  $payment->getCurrency(),
@@ -32,7 +34,7 @@ class CreateOrderRequest extends BankRequest implements BankRequestInterface {
                         'ApproveURL'    =>  $payment->getUrls()['ApproveURL'],
                         'CancelURL'     =>  $payment->getUrls()['CancelURL'],
                         'DeclineURL'    =>  $payment->getUrls()['DeclineURL'],
-                    ]
+                    ],
                 ],
             ],
             rootElement: 'TKKPG',
@@ -42,6 +44,5 @@ class CreateOrderRequest extends BankRequest implements BankRequestInterface {
             'body'  =>  $xml
         ]);
     }
-
 
 }

@@ -2,8 +2,8 @@
 
 namespace Ibehbudov\PaymentGateways\Providers;
 
-use Ibehbudov\PaymentGateways\Facades\Payment;
 use Ibehbudov\PaymentGateways\PaymentGateway;
+use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 

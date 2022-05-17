@@ -3,7 +3,7 @@
 namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank\Requests;
 
 use Ibehbudov\PaymentGateways\Contracts\BankRequestInterface;
-use Ibehbudov\PaymentGateways\Facades\Payment;
+use Ibehbudov\PaymentGateways\Contracts\PaymentGatewayInterface;
 use Ibehbudov\PaymentGateways\Library\XmlConverter;
 use Ibehbudov\PaymentGateways\Vendors\KapitalBank\BankRequest;
 use Psr\Http\Message\ResponseInterface;
@@ -22,15 +22,15 @@ class RefundOrderRequest extends BankRequest implements BankRequestInterface {
      * @return ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function run()
+    public function run(PaymentGatewayInterface $payment)
     {
         $xml = XmlConverter::arrayToXml(
             array: [
                 'Request' => [
                     'Operation' => 'Refund',
-                    'Language'  => Payment::getLocale(),
+                    'Language'  => $payment->getLocale(),
                     'Order'     => [
-                        'Merchant'  => Payment::getMerchant(),
+                        'Merchant'  => $payment->getMerchant(),
                         'OrderID'   => $this->orderId,
                         'Positions' => [
                             'Position' => [
@@ -44,11 +44,11 @@ class RefundOrderRequest extends BankRequest implements BankRequestInterface {
                             ],
                         ],
                     ],
-                    'Description'   => Payment::getDescription(),
+                    'Description'   => $payment->getDescription(),
                     'SessionID'     => $this->sessionId,
                     'Refund'        => [
-                        'Amount'    => Payment::getAmount(),
-                        'Currency'  => Payment::getCurrency(),
+                        'Amount'    => $payment->getAmount(),
+                        'Currency'  => $payment->getCurrency(),
                         'WithFee'   => 'false',
                     ],
                     'Source'    => '1',
