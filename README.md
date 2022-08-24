@@ -5,11 +5,15 @@
 
 ### Installation
 
-```composer require ibehbudov/payment-gateways```
+```php
+composer require ibehbudov/payment-gateways
+```
 
 ### Publish vendor files
 
-``` php artisan vendor:publish --tag=payment-gateways ```
+```php
+php artisan vendor:publish --tag=payment-gateways
+```
 
 ### Add alias
 
