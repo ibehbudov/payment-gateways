@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "php": ">=8.0",
-        "guzzlehttp/guzzle": "7.4.*",
+        "guzzlehttp/guzzle": "*",
         "spatie/array-to-xml": "*"
     },
     "license": "MIT",
