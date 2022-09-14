@@ -52,9 +52,7 @@ class OrderStatusRequest extends BankRequest implements BankRequestInterface {
 
         if(! $this->failed()) {
 
-            $status = OrderStatus::from(
-                $this->getBankResponseData()['Response']['Order']['OrderStatus']
-            );
+            $status = $this->getBankResponseData()['Response']['Order']['OrderStatus'];
 
             if($status === OrderStatus::APPROVED) {
                 Payment::setIsSuccess();

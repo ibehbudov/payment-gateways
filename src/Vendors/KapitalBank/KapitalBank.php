@@ -310,7 +310,7 @@ class KapitalBank implements PaymentGatewayInterface {
     {
         $arrayResponse = XmlConverter::xmlToArray($callbackXml);
 
-        if(OrderStatus::from($arrayResponse['OrderStatus']) === OrderStatus::APPROVED) {
+        if($arrayResponse['OrderStatus'] === OrderStatus::APPROVED) {
             $this->setBankRequest(
                 new OrderStatusRequest(
                     $arrayResponse['OrderID'],

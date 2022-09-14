@@ -2,12 +2,12 @@
 
 namespace Ibehbudov\PaymentGateways\Vendors\KapitalBank\Enums;
 
-enum OrderStatus: string
+class OrderStatus
 {
-    case CREATED    = 'CREATED';
-    case ON_LOCK    = 'ON-LOCK';
-    case ON_PAYMENT = 'ON-PAYMENT';
-    case APPROVED   = 'APPROVED';
-    case CANCELED   = 'CANCELED';
-    case DECLINED   = 'DECLINED';
+    const CREATED    = 'CREATED';
+    const ON_LOCK    = 'ON-LOCK';
+    const ON_PAYMENT = 'ON-PAYMENT';
+    const APPROVED   = 'APPROVED';
+    const CANCELED   = 'CANCELED';
+    const DECLINED   = 'DECLINED';
 }
