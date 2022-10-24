@@ -13,6 +13,8 @@ return [
             18
         ],
 
+        'endpoint'  =>  'https://tstpg.kapitalbank.az:5443/Exec',
+
         /*
          * set your callback url
          */

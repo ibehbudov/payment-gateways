@@ -281,6 +281,8 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function execute(): void
     {
+        $this->getBankRequest()->setEndpoint($this->getConfig('endpoint'));
+
         $client = $this->getBankRequest()->run($this);
 
         try {

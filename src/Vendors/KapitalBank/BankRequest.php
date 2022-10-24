@@ -17,10 +17,10 @@ class BankRequest {
     public HttpPaymentClient $httpClient;
 
     /**
-     * Service ling
+     * Service link
      * @var string
      */
-    public string $endpoint = 'https://e-commerce.kapitalbank.az:5443/Exec';
+    public string $endpoint;
 
     /**
      * @var string
@@ -84,6 +84,11 @@ class BankRequest {
                 CURLOPT_SSL_VERIFYPEER  =>  false,
             ],
         ]);
+    }
+
+    public function setEndpoint(string $endpoint)
+    {
+        $this->endpoint = $endpoint;
     }
 
     /**
