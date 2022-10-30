@@ -310,18 +310,23 @@ class KapitalBank implements PaymentGatewayInterface {
      */
     public function callback(string $callbackXml)
     {
-        $arrayResponse = XmlConverter::xmlToArray($callbackXml);
+        try {
+            $callbackXml = str_replace('Message+date', 'Message date', $callbackXml); // Bank sends corrupted data
 
-        if($arrayResponse['OrderStatus'] === OrderStatus::APPROVED) {
-            $this->setBankRequest(
-                new OrderStatusRequest(
-                    $arrayResponse['OrderID'],
-                    $arrayResponse['SessionID']
-                )
-            );
+            $arrayResponse = XmlConverter::xmlToArray($callbackXml);
 
-            $this->execute();
+            if($arrayResponse['Message']['OrderStatus'] === OrderStatus::APPROVED) {
+                $this->setBankRequest(
+                    new OrderStatusRequest(
+                        $arrayResponse['Message']['OrderID'],
+                        $arrayResponse['Message']['SessionID']
+                    )
+                );
+
+                $this->execute();
+            }
         }
+        catch (\Exception $exception){}
     }
 
 }
